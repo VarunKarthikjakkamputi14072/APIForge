@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+html,
+body {
+  background-color: #0b1016;
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  min-height: 100%;
+}
+
+body {
+  background-image:
+    radial-gradient(
+      circle at 15% -10%,
+      rgba(34, 211, 163, 0.08),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(56, 189, 248, 0.05),
+      transparent 40%
+    );
+  background-attachment: fixed;
+}
+
+/* Slim, terminal-feel scrollbar. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0b1016;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2a37;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2c3a4a;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-lg border border-terminal-border bg-terminal-panel/80 backdrop-blur-sm;
+  }
+  .panel-header {
+    @apply flex items-center justify-between border-b border-terminal-border px-4 py-3;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-terminal-accent px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-terminal-bg disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-terminal-border bg-transparent px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-terminal-accent/60 hover:text-terminal-accent;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+  .input {
+    @apply w-full rounded-md border border-terminal-border bg-terminal-bg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-terminal-accent focus:outline-none focus:ring-1 focus:ring-terminal-accent;
+  }
+  .label {
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-400;
+  }
+  .mono {
+    font-family: var(--font-mono);
+  }
+  .prompt::before {
+    content: "$ ";
+    color: #22d3a3;
+    font-family: var(--font-mono);
+  }
+  .section-title {
+    @apply text-xs font-semibold uppercase tracking-[0.25em] text-terminal-accent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(34, 211, 163, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 211, 163, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
