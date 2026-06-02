@@ -13,6 +13,7 @@ import time
 from typing import Any
 
 from fastapi import Request, Response
+from redis.exceptions import RedisError
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp
@@ -158,11 +159,19 @@ class APIKeyRateLimitAndLogMiddleware(BaseHTTPMiddleware):
 
         rate_headers: dict[str, str] = {}
         if api_key_row is not None and limit is not None:
-            result = await check_and_increment(api_key_header, limit)
-            rate_headers["X-RateLimit-Limit"] = str(result.limit)
-            rate_headers["X-RateLimit-Remaining"] = str(result.remaining)
-            rate_headers["X-RateLimit-Reset"] = str(result.retry_after_seconds)
-            if not result.allowed:
+            try:
+                result = await check_and_increment(api_key_header, limit)
+            except RedisError:
+                # Fail open: if Redis is unreachable we must not 500 the whole
+                # gateway. Skip rate limiting for this request and let it through.
+                # A brief Redis outage degrades to "no limiting" rather than a
+                # total outage; the request is still served and logged.
+                result = None
+            if result is not None:
+                rate_headers["X-RateLimit-Limit"] = str(result.limit)
+                rate_headers["X-RateLimit-Remaining"] = str(result.remaining)
+                rate_headers["X-RateLimit-Reset"] = str(result.retry_after_seconds)
+            if result is not None and not result.allowed:
                 body = {
                     "error": "rate_limit_exceeded",
                     "detail": (
