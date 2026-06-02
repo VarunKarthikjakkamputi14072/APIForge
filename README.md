@@ -1,6 +1,6 @@
 # APIForge
 
-**Live:** https://apiforge-production-78f0.up.railway.app
+**Live:** https://apiforge-jnwp.onrender.com
 
 APIForge is a developer-facing API gateway that unifies third-party APIs
 (OpenWeather · NewsAPI · Alpha Vantage) behind one rate-limited, authenticated,
