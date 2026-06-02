@@ -1,6 +1,7 @@
 # APIForge
 
-**Live:** https://apiforge-jnwp.onrender.com
+**Portal:** https://apiforge-portal.vercel.app  
+**API:** https://apiforge-jnwp.onrender.com
 
 APIForge is a developer-facing API gateway that unifies third-party APIs
 (OpenWeather · NewsAPI · Alpha Vantage) behind one rate-limited, authenticated,
