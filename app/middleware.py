@@ -137,7 +137,14 @@ class APIKeyRateLimitAndLogMiddleware(BaseHTTPMiddleware):
         if not request.url.path.startswith("/api/"):
             return await call_next(request)
 
+        # Accept the key from X-API-Key or Authorization: Bearer (OpenAI-client
+        # compatibility), matching the require_api_key dependency.
         api_key_header = request.headers.get("X-API-Key", "")
+        if not (api_key_header and api_key_header.startswith(API_KEY_PREFIX)):
+            auth = request.headers.get("Authorization", "")
+            token = auth[7:] if auth.lower().startswith("bearer ") else auth
+            if token.startswith(API_KEY_PREFIX):
+                api_key_header = token
         api_key_row: APIKey | None = None
         limit: int | None = None
 

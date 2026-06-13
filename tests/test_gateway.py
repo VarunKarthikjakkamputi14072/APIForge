@@ -35,6 +35,26 @@ def test_chat_with_bad_api_key_is_401(client):
     assert response.status_code == 401
 
 
+def test_chat_accepts_authorization_bearer_key(
+    client, registered_developer, monkeypatch
+):
+    """OpenAI-compatible clients send the key as Authorization: Bearer — accept it."""
+    _, _, api_key = registered_developer
+
+    async def fake_fetch(req):
+        return _chat_fixture(), 10
+
+    monkeypatch.setattr("app.routers.gateway.fetch_chat_completion", fake_fetch)
+
+    response = client.post(
+        "/api/v1/chat/completions",
+        json=_chat_body(),
+        headers={"Authorization": f"Bearer {api_key}"},
+    )
+    assert response.status_code == 200
+    assert "X-RateLimit-Limit" in response.headers  # middleware metered it too
+
+
 # --- Chat route ---------------------------------------------------------------
 
 
