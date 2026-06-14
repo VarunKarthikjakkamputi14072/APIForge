@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 
-from app import cache
+from app import cache, telemetry
 from app.config import get_settings
 from app.deps import require_api_key
 from app.models import APIKey
@@ -61,6 +61,10 @@ async def chat_completions(
     if cached is not None:
         await cache.record_hit(int(cached.get("usage", {}).get("total_tokens", 0)))
         response.headers["X-Cache"] = "HIT"
+        telemetry.tap_chat(
+            api_key=api_key, body=body, usage=cached.get("usage", {}),
+            latency_ms=0, cache_hit=True,
+        )
         return ChatCompletionResponse(**{**cached, "cached": True})
 
     await cache.record_miss()
@@ -72,6 +76,10 @@ async def chat_completions(
     _record_upstream_latency(request, latency_ms)
     await cache.set_cached(key, completion.model_dump(), settings.cache_ttl_chat)
     response.headers["X-Cache"] = "MISS"
+    telemetry.tap_chat(
+        api_key=api_key, body=body, usage=completion.usage.model_dump(),
+        latency_ms=latency_ms, cache_hit=False,
+    )
     return completion
 
 

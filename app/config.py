@@ -98,6 +98,11 @@ class Settings(BaseSettings):
 
     upstream_timeout_seconds: float = Field(default=30.0, alias="UPSTREAM_TIMEOUT_SECONDS")
 
+    # Meridian telemetry tap. When set, Transit fires a non-blocking record of
+    # each chat query (length, tokens, latency, cache hit) to Meridian's RAG
+    # drift monitor. Empty disables the tap — the gateway runs standalone.
+    meridian_url: str = Field(default="", alias="MERIDIAN_URL")
+
 
 @lru_cache
 def get_settings() -> Settings:
