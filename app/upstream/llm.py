@@ -54,6 +54,8 @@ async def fetch_chat_completion(
     settings = get_settings()
     providers = _chat_providers(settings)
     if not providers:
+        if settings.use_fake_provider:
+            return _fake_completion(req, settings)
         raise UpstreamError(
             "No chat provider configured (set NVIDIA_API_KEY or a fallback key).",
             status_code=503,
@@ -97,6 +99,30 @@ async def fetch_chat_completion(
         status_code=502,
         provider="waterfall",
     )
+
+
+def _fake_completion(
+    req: ChatCompletionRequest, settings
+) -> tuple[ChatCompletionResponse, int]:
+    """Offline stub completion. Usage and latency scale with the prompt size so
+    bigger / off-corpus queries produce larger token counts and slower answers —
+    a realistic signal for the downstream drift monitor."""
+    text = " ".join((m.content or "") for m in req.messages)
+    prompt_tokens = max(1, len(text) // 4)
+    completion_tokens = 40 + prompt_tokens // 10
+    latency_ms = 200 + prompt_tokens // 2
+    usage = ChatUsage(
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        total_tokens=prompt_tokens + completion_tokens,
+    )
+    completion = ChatCompletionResponse(
+        model=req.model or settings.nvidia_model or "fake-model",
+        content="[offline] Stubbed answer from Transit's fake provider (no upstream key).",
+        usage=usage,
+        provider="fake",
+    )
+    return completion, latency_ms
 
 
 def _normalize(data: dict, model: str, provider: str = "nvidia-nim") -> ChatCompletionResponse:

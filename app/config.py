@@ -103,6 +103,12 @@ class Settings(BaseSettings):
     # drift monitor. Empty disables the tap — the gateway runs standalone.
     meridian_url: str = Field(default="", alias="MERIDIAN_URL")
 
+    # Offline fake provider: when no real provider key is set and this is on, the
+    # gateway returns a stub completion (usage derived from the prompt) so the
+    # whole platform runs with no keys — the same drop-in-fakes discipline as the
+    # RAG apps. Off in production, where real keys exist.
+    use_fake_provider: bool = Field(default=False, alias="USE_FAKE_PROVIDER")
+
 
 @lru_cache
 def get_settings() -> Settings:
